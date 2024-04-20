@@ -11,10 +11,16 @@ import xonsh.built_ins as built_ins
 
 __all__ = ()
 
+def utcnow():
+    return datetime.datetime.now(datetime.UTC)
+
+def utcfromtimestamp(ts):
+    return datetime.datetime.fromtimestamp(ts, datetime.UTC)
+
 class ZEntry(collections.namedtuple('ZEntry', ['path', 'rank', 'time'])):
     @property
     def frecency(self):
-        dx = datetime.datetime.utcnow() - self.time
+        dx = utcnow() - self.time
         if dx < datetime.timedelta(hours=1):
             return self.rank * 4
         elif dx < datetime.timedelta(days=1):
@@ -95,7 +101,7 @@ class ZHandler:
                     p, r, t = l.rsplit('|', 2)
                     r = float(r)
                     if r >= 1:
-                        t = datetime.datetime.utcfromtimestamp(float(t))
+                        t = utcfromtimestamp(float(t))
                         yield ZEntry(p.replace('\\n','\n'), r, t)
                 except Exception:
                     continue
@@ -197,7 +203,7 @@ class ZHandler:
         return pwd
 
     def add(self, path):
-        now = datetime.datetime.utcnow()
+        now = utcnow()
         data = list(self.load_data())
         for i, e in enumerate(data):
             if e.path == path:
